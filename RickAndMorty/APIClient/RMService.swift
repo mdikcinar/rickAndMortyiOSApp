@@ -6,3 +6,11 @@
 //
 
 import Foundation
+
+final class RMService {
+    static let shared = RMService()
+
+    private init() {}
+
+    func excecute(_ request: RMRequest, completor: @escaping () -> Void) {}
+}

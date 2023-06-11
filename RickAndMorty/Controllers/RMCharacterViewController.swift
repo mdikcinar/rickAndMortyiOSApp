@@ -13,18 +13,16 @@ final class RMCharacterViewController: UIViewController {
         view.backgroundColor = .systemBackground
         title = "Characters"
 
-        let request = RMRequest(endpoint: .character)
-
-        RMService.shared.excecute(
-            request,
-            expectedType: RMCharacter.self,
-            completor: { result in
-                switch result {
-                    case .success(let character):
-                        print(character)
-                    case .failure(let error):
-                        print(error)
-                }
-            })
+        RMService.shared.execute(
+            .listCharactersRequest,
+            expecting: RMPaginatedResponse<RMCharacter>.self)
+        { result in
+            switch result {
+                case .success(let paginatedCharacters):
+                    print(String(describing: paginatedCharacters))
+                case .failure(let error):
+                    print(String(describing: error))
+            }
+        }
     }
 }

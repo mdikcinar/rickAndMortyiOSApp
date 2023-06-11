@@ -8,21 +8,23 @@
 import UIKit
 
 final class RMCharacterViewController: UIViewController {
+    private let characterListView = CharacterListView()
+
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .systemBackground
         title = "Characters"
+        setUpView()
+    }
 
-        RMService.shared.execute(
-            .listCharactersRequest,
-            expecting: RMPaginatedResponse<RMCharacter>.self)
-        { result in
-            switch result {
-                case .success(let paginatedCharacters):
-                    print(String(describing: paginatedCharacters))
-                case .failure(let error):
-                    print(String(describing: error))
-            }
-        }
+    private func setUpView() {
+        view.addSubview(characterListView)
+
+        NSLayoutConstraint.activate([
+            characterListView.topAnchor.constraint(equalTo: view.topAnchor),
+            characterListView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+            characterListView.leftAnchor.constraint(equalTo: view.leftAnchor),
+            characterListView.rightAnchor.constraint(equalTo: view.rightAnchor)
+        ])
     }
 }

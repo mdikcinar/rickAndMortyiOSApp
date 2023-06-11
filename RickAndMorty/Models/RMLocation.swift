@@ -7,11 +7,11 @@
 
 import Foundation
 
-struct BasicLocation: Codable {
+struct RMBasicLocation: Codable {
     let name, url: String
 }
 
-struct Location: Codable {
+struct RMLocation: Codable {
     let id: Int
     let name, type, dimension: String
     let residents: [String]

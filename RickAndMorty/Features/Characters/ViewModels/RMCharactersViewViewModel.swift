@@ -7,12 +7,13 @@
 
 import UIKit
 
-protocol RMCharacterListViewViewModelDelegate: AnyObject {
+protocol RMCharactersViewViewModelDelegate: AnyObject {
     func didFetchCharacters()
+    func didSelectCharacter(_ character: RMCharacter)
 }
 
-final class RMCharacterListViewViewModel: NSObject {
-    public weak var delegate: RMCharacterListViewViewModelDelegate?
+final class RMCharactersViewViewModel: NSObject {
+    public weak var delegate: RMCharactersViewViewModelDelegate?
 
     private var characters: [RMCharacter] = [] {
         didSet {
@@ -29,6 +30,15 @@ final class RMCharacterListViewViewModel: NSObject {
 
     private var cellViewModels: [RMCharacterCollectionViewCellViewModel] = []
 
+    public var shouldShowLoadMoreIndicator: Bool {
+        if paginatedInfo?.next != nil {
+            return true
+        }
+        return false
+    }
+
+    private var paginatedInfo: RMPaginatedInfo?
+
     public func fetchCharcters() {
         RMService.shared.execute(
             .listCharactersRequest,
@@ -37,7 +47,9 @@ final class RMCharacterListViewViewModel: NSObject {
             switch result {
                 case .success(let paginatedCharacters):
                     let results = paginatedCharacters.results
+                    let info = paginatedCharacters.info
                     self?.characters = results
+                    self?.paginatedInfo = info
                     DispatchQueue.main.async {
                         self?.delegate?.didFetchCharacters()
                     }
@@ -46,9 +58,11 @@ final class RMCharacterListViewViewModel: NSObject {
             }
         }
     }
+
+    public func fetchAdditionalCharacters() {}
 }
 
-extension RMCharacterListViewViewModel: UICollectionViewDataSource, UICollectionViewDelegate, UICollectionViewDelegateFlowLayout {
+extension RMCharactersViewViewModel: UICollectionViewDataSource, UICollectionViewDelegate, UICollectionViewDelegateFlowLayout {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         return cellViewModels.count
     }
@@ -72,5 +86,17 @@ extension RMCharacterListViewViewModel: UICollectionViewDataSource, UICollection
             width: width,
             height: width * 1.5
         )
+    }
+
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        collectionView.deselectItem(at: indexPath, animated: true)
+        let character = characters[indexPath.row]
+        delegate?.didSelectCharacter(character)
+    }
+}
+
+extension RMCharactersViewViewModel: UIScrollViewDelegate {
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        guard shouldShowLoadMoreIndicator else { return }
     }
 }
